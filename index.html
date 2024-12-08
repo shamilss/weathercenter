@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Center</title>
+    <!-- favicon -->
+    <link rel="icon" href="./img/399-3999742_weather-icon-png-image-weather-app-icon-transparent-removebg-preview.png">
+    <!-- google fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+        rel="stylesheet">
+    <!-- fontawesome cdn -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css"
+        integrity="sha512-5Hs3dF2AEPkpNAR7UiOHba+lRSJNeM2ECkwxUIxC1Q/FLycGTbNapWXB4tP889k5T5Ju8fs4b1P5z/iB4nMfSQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <style>
+        * {
+            font-family: "Poppins", sans-serif;
+            font-weight: 400;
+            font-style: normal;
+            border: 0px;
+            padding: 0px;
+        }
+
+        #main {
+            width: 100%;
+            height: 100vh;
+            background-image: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%);
+        }
+
+        #inside {
+            background-image: linear-gradient(120deg,
+                    rgb(255, 255, 255, 0.3),
+                    rgb(255, 255, 255, 0.2));
+            background-color: transparent;
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            animation: fadefromleft 1s ease-in-out;
+        }
+
+        #note {
+            background-image: linear-gradient(120deg,
+                    rgb(255, 255, 255, 0.3),
+                    rgb(255, 255, 255, 0.2));
+            background-color: transparent;
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            animation: fadefromright 1s ease-in-out;
+        }
+
+        #details {
+            background-image: linear-gradient(120deg,
+                    rgb(255, 255, 255, 0.3),
+                    rgb(255, 255, 255, 0.2));
+            background-color: transparent;
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            animation: fadefromright 1s ease-in-out;
+        }
+
+        #input {
+            position: relative;
+        }
+
+        #icon {
+            position: absolute;
+            right: 0px;
+            top: 10px;
+        }
+
+        @media (max-width: 992px) {
+            #main.search-executed {
+                height: 100%;
+            }
+        }
+
+        @keyframes fadefromleft {
+            0%{
+                opacity: 0;
+                transform: translateX(-30px) scale(0.9);
+            }
+            100%{
+                opacity: 1;
+                transform: translateY(0px) scale(1);
+            }
+            
+        }
+
+        @keyframes fadefromright {
+            0%{
+                opacity: 0;
+                transform: translateX(30px) scale(0.9);
+            }
+            100%{
+                opacity: 1;
+                transform: translateY(0px) scale(1);
+            }
+            
+        }
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div id="main" class="container-fluid">
+        <div id="sub" class="row w-100 h-100 mx-auto d-md-flex justify-content-center align-items-center">
+            <div class="col-md-1"></div>
+            <div class="col-md-5 ">
+                <div id="inside" class="text-dark w-100 p-5 my-5 my-lg-0">
+                    <h2 style="font-weight: bold;" class="mb-3 px-1">WEATHER CENTER</h2>
+                    <div id="input" class="d-flex">
+                        <input id="cityName" type="text" class="form-control rounded p-3" placeholder="Search City" />
+                        <button id="icon" onclick="search()" class="btn">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <div class="mt-4 d-md-flex justify-content-between px-1">
+                        <div class="d-flex align-items-center">
+                            <h5><i class="fa-solid fa-clock me-2 text-light"></i></h5>
+                            <h5 id="showTime"></h5>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <h5><i class="fa-solid fa-calendar-days me-2 text-light"></i></h5>
+                            <h5 id="showDate"></h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div id="result">
+                </div>
+            </div>
+            <div class="col-md-1"></div>
+        </div>
+    </div>
+</body>
+<script>
+
+    function getTime() {
+        const time = new Date();
+        let hour = time.getHours();
+        let min = time.getMinutes();
+        const period = hour >= 12 ? 'PM' : 'AM';
+        hour = hour % 12 || 12;
+        min = min.toString().padStart(2, '0');
+        showTime.innerHTML = `${hour}:${min} ${period}`;
+        setTimeout(getTime, 1000);
+    }
+
+    function displayDate() {
+        const today = new Date();
+        const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const dayName = days[today.getDay()];
+        const day = today.getDate();
+        const monthName = months[today.getMonth()];
+        const year = today.getFullYear();
+        const formattedDate = `${dayName}, ${day} ${monthName} ${year}`;
+        document.getElementById("showDate").innerText = formattedDate;
+    }
+
+    window.onload = function () {
+        getTime();
+        displayDate();
+    }
+
+    const search = async () => {
+        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cityName.value}&appid=5fe36b192ffd1c36dffb6752bc1722b2`)
+        response.json().then((data) => {
+           
+            if (data.cod != 200) {
+                Swal.fire({
+                    title: 'Invalid Input!',
+                    text: 'Please enter the city name to proceed.',
+                    icon: 'warning',
+                    confirmButtonText: 'Okay'
+                });
+            }
+            document.getElementById('main').classList.add('search-executed');
+
+            //city
+            const city = data.name
+
+            //country 
+            const country = data.sys.country;
+
+            //icon
+            const icon = data.weather[0].icon
+
+            //wind
+            const wind = ((data.wind.speed) * 3.6).toFixed(1)
+            let windnote = '';
+
+            if (wind < 10) {
+                windnote = 'Light breeze, calm conditions.';
+            } else if (wind >= 10 && wind <= 30) {
+                windnote = 'Moderate breeze, comfortable conditions.';
+            } else if (wind > 30 && wind <= 50) {
+                windnote = 'Strong wind, use caution outdoors.';
+            } else {
+                windnote = 'Very strong winds, hazardous conditions.';
+            }
+
+            //humidity
+            const humidity = data.main.humidity
+            let humiditynote = '';
+
+            if (humidity < 50) {
+                humiditynote = 'The air feels dry and comfortable.';
+            } else if (humidity >= 50 && humidity <= 70) {
+                humiditynote = 'Moderately humid with a slight feeling of dampness.';
+            } else if (humidity > 70 && humidity <= 90) {
+                humiditynote = 'High humidity creating noticeable discomfort.';
+            } else {
+                humiditynote = 'Oppressive humidity levels. Sweating is likely even in cooler temperatures.';
+            }
+
+            //temp
+            const temp = ((data.main.temp) - 273.15).toFixed(1)
+            let tempnote = '';
+
+            if (temp < 0) {
+                tempnote = 'Cold conditions. Warm clothing is recommended to stay comfortable.';
+            } else if (temp >= 0 && temp <= 10) {
+                tempnote = 'Cold conditions. Warm clothing is recommended to stay comfortable.';
+            } else if (temp >= 11 && temp <= 20) {
+                tempnote = 'Cool and pleasant. Light layers may suffice.';
+            } else if (temp >= 21 && temp <= 25) {
+                tempnote = 'Ideal temperature with comfortable conditions.';
+            } else if (temp >= 26 && temp <= 30) {
+                tempnote = 'Warm weather. Hydration is essential.';
+            } else if (temp >= 31 && temp <= 35) {
+                tempnote = 'Hot and uncomfortable. Avoid prolonged sun exposure.';
+            } else {
+                tempnote = 'Very high temperatures. Extreme caution is advised.';
+            }
+
+            //max temp
+            const maxtemp = ((data.main.temp_max) - 273.15).toFixed(1)
+
+            //min temp
+            const mintemp = ((data.main.temp_min) - 273.15).toFixed(1)
+
+            //description
+            const description = data.weather[0].description
+
+            result.innerHTML = ` <div id='details' class="px-5 py-4">
+                        <h3 class='mt-2' style='font-weight: bold;'><i class="fa-solid fa-location-pin me-3"></i>${city}, ${country}
+                        </h3>
+
+                        <div class="d-flex justify-content-between align-items-center ">
+                            <div class="me-3">
+                                <img style=" width: 200px; height: 150px; object-fit: cover; "
+                                    src="https://openweathermap.org/img/wn/${icon}@2x.png" alt="no image" />
+                            </div>
+                            <div class="ms-3">
+                                <h1 style="font-size: 50px;font-weight: bold;">${temp} °C
+                                </h1>
+                                <h4 class='text-capitalize'>${description}</h4>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between mt-3">
+                            <div class="d-flex align-items-center me-3">
+                                <h1 style="font-size: 50px;"><i class="fa-solid fa-temperature-arrow-up me-3"></i></h1>
+                                <div>
+                                    <h5>Max</h5>
+                                    <h2 style='font-weight: bold;'>${maxtemp} °C</h2>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center ms-3">
+                                <h1 style="font-size: 50px;"><i class="fa-solid fa-temperature-arrow-down me-3"></i>
+                                </h1>
+                                <div>
+                                    <h5>Min</h5>
+                                    <h2 style='font-weight: bold;'>${mintemp} °C</h2>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center mt-5 mb-2 justify-content-between">
+                            <div class="d-flex align-items-center me-3">
+                                <h1 style="font-size: 50px;"><i class="fa-solid fa-droplet me-3"></i></h1>
+                                <div>
+                                    <h5>Humidity</h5>
+                                    <h2 style='font-weight: bold;'>${humidity} %</h2>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center ms-3">
+                                <h1 style="font-size: 50px;"> <i class="fa-solid fa-wind me-3"></i></h1>
+                                <div>
+                                    <h5>Wind Speed</h5>
+                                    <h2 style='font-weight: bold;'>${wind} km/h</h2>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id='note' class="px-5 py-4 mt-4 mb-5 mb-lg-0">
+                        <h3 class='mt-2' style='font-weight: bold;'>Current Weather Insights</h3>
+                        <div class="mt-4 mb-2 d-flex ">
+                            <div class="px-3 py-2 rounded">
+                                <h5 style='font-weight: bold;'>Temperature</h5>
+                                <p>${tempnote}</p>
+                            </div>
+                            <div class="px-3 py-2  rounded mx-1">
+                                <h5 style='font-weight: bold;'>Humidity</h5>
+                                <p>${humiditynote}</p>
+                            </div>
+                            <div class="px-3 py-2  rounded">
+                                <h5 style='font-weight: bold;'>Wind Speed</h5>
+                                <p>${windnote}</p>
+                            </div>
+                        </div>
+                    </div>
+             `
+        })
+    }
+
+</script>
+
+</html>
